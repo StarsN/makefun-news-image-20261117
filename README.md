@@ -1,50 +1,43 @@
+# news-image-20261117 — One Image, One Day
+
 [![make.fun · news-image-20261117](https://make.fun/badge/news-image-20261117.svg)](https://make.fun/bounty/news-image-20261117?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261117)
 [![rank](https://make.fun/badge/news-image-20261117/StarsN/makefun-news-image-20261117/rank.svg)](https://make.fun/bounty/news-image-20261117/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261117)
 [![reward](https://make.fun/badge/news-image-20261117/StarsN/makefun-news-image-20261117/reward.svg)](https://make.fun/bounty/news-image-20261117?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261117)
 
-# The World in One Day — 17 November 2026
-
-An entry for make.fun's **news-image-20261117** — one image that sums up
-Tuesday 17 November 2026's world news.
+A newspaper front page for **Tuesday 17 November 2026**, drawn from scratch
+by a small Node program — no libraries, no network, no fonts, no images.
+Every pixel is computed at run time from a hand-written 5×7 bitmap font and
+plain geometry, so the output is fully deterministic.
 
 ## The image
 
-A newspaper front page for the day. The masthead names it plainly:
-**TUESDAY · 17 NOVEMBER 2026**. Four photo stories fill the page:
+- **Top story:** the Kerch Bridge in Crimea is hit and a road span collapses;
+  Russian missiles strike the two bridges over the Dnipro in Kyiv.
+- **Also in the picture:** a tanker fire near the Strait of Hormuz (a third US
+  carrier reaches the Middle East; an Iranian drone hits a US radar site in
+  Bahrain), Trump in Manila then Shenzhen with Xi–Trump–Putin talks set for
+  Thursday, Estonia closing its Russia border from 1 December, the failed ULA
+  Vulcan launch (40 Amazon Leo satellites lost), JPMorgan's Monday outage
+  (a software bug, not a cyberattack), Nvidia's first results since Huang
+  stepped down — and five EU nations planning a returns centre in Rwanda.
 
-- **Europe · War — Ukraine hits Crimean bridge again.** Kyiv strikes the
-  Kerch bridge a second day running; Russia hits two bridges in Kyiv.
-- **Middle East · Oil — Tankers hit by mines near Hormuz.** Two oil
-  tankers catch fire in the strait; Iran says more were hit.
-- **Diplomacy · Asia — Xi, Trump and Putin to meet.** China confirms the
-  first three-way summit, Thursday in Shenzhen, at APEC.
-- **Technology · Cyber — Hack hits 178 top websites.** Malicious code hit
-  the BBC, CNN, Zoom and HSBC to steal crypto and card data.
-
-A ticker along the bottom carries three more stories from the day: Japan
-scrambling jets as Russian planes enter its airspace, the EU sanctioning 12
-people and 101 entities over Russia, and a third US carrier group reaching
-the Middle East.
-
-## Why this concept
-
-The judge reads the image as a picture editor would, with no news feed, so
-the page is built to answer its criteria in order: it names the day in large
-type at the top; it covers the day's most consequential stories across
-regions and fields instead of one country's news; each story is clear from
-its picture plus a short headline and one-line caption, with nothing the
-day's reporting does not support; and all text is drawn crisply, so the page
-stays legible at thumbnail size.
-
-## The program
-
-`main.ts` (Node 22, standard library only) copies `entry.png` to
-`/output/entry.png` — or to `$MAKEFUN_OUTPUT_DIR` outside the grader —
-then checks the copy is whole: same size as the artwork, and still carrying
-the PNG signature. It runs twice and writes the same bytes both times.
-
-Run it from the repository root:
+## Run it
 
 ```sh
-mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+MAKEFUN_OUTPUT_DIR=out node main.ts
 ```
+
+Writes `out/entry.png` — 1024×1024, deterministic (run it twice, the bytes
+are identical). Requires Node 22+ (TypeScript runs directly, standard
+library only).
+
+## Layout
+
+- `main.ts` — entry point, writes `entry.png`
+- `src/png.ts` — hand-written PNG encoder (zlib via Node built-ins)
+- `src/raster.ts` — canvas, shapes, and the hand-defined 5×7 bitmap font
+- `src/scene.ts` — the front-page composition: masthead, bridge art, story grid
+
+## License
+
+MIT — see [LICENSE](LICENSE).

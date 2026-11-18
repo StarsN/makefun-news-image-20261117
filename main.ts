@@ -1,47 +1,22 @@
-// news-image-20261117 entry: "The World in One Day — 17 November 2026".
-//
-// The artwork lives beside this file as entry.png: a newspaper front page
-// for Tuesday 17 November 2026 — the Crimean bridge struck again, tankers
-// hit by mines near Hormuz, the Xi–Trump–Putin summit confirmed for
-// Shenzhen, and a hack that reached 178 top websites, plus a ticker of
-// three more stories from the day. The program's whole job is to deliver
-// those exact bytes to the output directory, unchanged, every run: the
-// judge sees precisely the file the repository holds, so the copy must be
-// byte for byte and deterministic.
-//
-// Run it the way the kit suggests, from the repository root:
-//   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
-// In the grader's container MAKEFUN_OUTPUT_DIR is unset and the image goes
-// to /output/entry.png.
+// Entry point: render the 17 November 2026 front page and write entry.png.
+// Deterministic: no clock, no randomness, no network. Run twice -> same bytes.
+// Usage: MAKEFUN_OUTPUT_DIR=out node main.ts
+// (Node 22+ can run TypeScript directly; only node built-ins are used.)
 
-import { copyFileSync, mkdirSync, readFileSync, statSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { createHash } from "node:crypto";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { drawScene } from "./src/scene.ts";
+import { encodePng } from "./src/png.ts";
 
-// The image sits next to this program in the repository, wherever the
-// repository itself was unpacked.
-const repoDir = dirname(fileURLToPath(import.meta.url));
-const source = join(repoDir, 'entry.png');
+const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "out";
+mkdirSync(outDir, { recursive: true });
 
-// MAKEFUN_OUTPUT_DIR stands in for /output outside the grader.
-const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
-mkdirSync(outputDir, { recursive: true });
+const canvas = drawScene();
+const png = encodePng(canvas.width, canvas.height, canvas.data);
+const outPath = join(outDir, "entry.png");
+writeFileSync(outPath, png);
+const sha = createHash("sha256").update(png).digest("hex");
 
-const target = join(outputDir, 'entry.png');
-copyFileSync(source, target);
-
-// The judge sees exactly the bytes delivered, so prove the copy arrived
-// whole: if the delivered file is not the same size as the artwork in the
-// repository, fail loudly rather than hand over a truncated image. Also
-// check the delivered bytes still open as the PNG the gate expects —
-// the 8-byte PNG signature — so a corrupted source fails here instead of
-// reaching the judge as a broken file.
-const expected = statSync(source).size;
-const delivered = statSync(target).size;
-if (delivered !== expected) {
-  throw new Error(`entry.png copy went wrong: ${delivered} bytes delivered, ${expected} expected`);
-}
-const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-if (!readFileSync(target).subarray(0, 8).equals(PNG_MAGIC)) {
-  throw new Error('entry.png delivered without a PNG signature: source image is not a PNG');
-}
+console.log(`wrote ${outPath} (${canvas.width}x${canvas.height}, ${png.length} bytes)`);
+console.log(`sha256 ${sha}`);
